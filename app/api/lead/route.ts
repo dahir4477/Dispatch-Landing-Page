@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("early_access_leads")
       .insert({
         first_name: trimmedFirstName,
@@ -53,9 +53,7 @@ export async function POST(request: NextRequest) {
         phone: phone && typeof phone === "string" ? phone.trim() || null : null,
         trucks: trucks && typeof trucks === "string" ? trucks.trim() || null : null,
         weekly_revenue: weekly_revenue && typeof weekly_revenue === "string" ? weekly_revenue.trim() || null : null,
-      })
-      .select("id, created_at")
-      .single();
+      });
 
     if (error) {
       if (error.code === "23505") {
@@ -74,8 +72,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "You're on the list! We'll reach out soon.",
-      id: data?.id,
-      created_at: data?.created_at,
     });
   } catch (err) {
     console.error("Lead API error:", err);

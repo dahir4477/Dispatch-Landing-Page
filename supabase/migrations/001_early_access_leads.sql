@@ -1,6 +1,8 @@
--- Early access leads table for AI Dispatch landing page
--- Run this in your Supabase SQL Editor or via Supabase CLI
+-- Early access leads table for Suprihub Logistics & Dispatch Solutions
+-- Run this in your Supabase SQL Editor or via Supabase CLI.
+-- Safe to run multiple times (idempotent).
 
+-- Table
 CREATE TABLE IF NOT EXISTS early_access_leads (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   first_name TEXT NOT NULL,
@@ -11,10 +13,16 @@ CREATE TABLE IF NOT EXISTS early_access_leads (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Optional: enable RLS and allow anonymous inserts for the anon key
+-- Enable RLS
 ALTER TABLE early_access_leads ENABLE ROW LEVEL SECURITY;
 
--- Policy: allow insert for anon (used by landing page form)
+-- Drop existing policies so this script can be re-run without errors
+DROP POLICY IF EXISTS "Allow anonymous insert for early_access_leads" ON early_access_leads;
+DROP POLICY IF EXISTS "Service role only for select" ON early_access_leads;
+DROP POLICY IF EXISTS "Service role only for update" ON early_access_leads;
+DROP POLICY IF EXISTS "Service role only for delete" ON early_access_leads;
+
+-- Policy: allow insert for anon (used by landing page form / API route)
 CREATE POLICY "Allow anonymous insert for early_access_leads"
   ON early_access_leads
   FOR INSERT
@@ -40,6 +48,6 @@ CREATE POLICY "Service role only for delete"
   TO service_role
   USING (true);
 
--- Index for looking up by email
+-- Indexes for lookups
 CREATE INDEX IF NOT EXISTS idx_early_access_leads_email ON early_access_leads (email);
 CREATE INDEX IF NOT EXISTS idx_early_access_leads_created_at ON early_access_leads (created_at DESC);
