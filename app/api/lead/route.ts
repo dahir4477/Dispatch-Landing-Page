@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabaseClient";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -37,14 +36,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = getSupabase();
-    if (!supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) {
       console.error("Supabase env vars missing");
       return NextResponse.json(
         { success: false, error: "Server configuration error. Please try again later." },
         { status: 500 }
       );
     }
+
+    // Dynamic import so @supabase/supabase-js is never loaded at build time (fixes Vercel build)
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(url, key);
 
     const { error } = await supabase
       .from("early_access_leads")
