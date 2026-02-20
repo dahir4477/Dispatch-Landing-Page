@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabase } from "@/lib/supabaseClient";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabase = getSupabase();
+    if (!supabase) {
       console.error("Supabase env vars missing");
       return NextResponse.json(
         { success: false, error: "Server configuration error. Please try again later." },
